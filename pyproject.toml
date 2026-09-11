@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nba-second-options"
+version = "1.0.0"
+description = "Contextual analysis of elite single-postseason NBA second-option runs"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "beautifulsoup4>=4.12,<5",
+  "lxml>=5,<7",
+  "matplotlib>=3.9,<4",
+  "nba_api>=1.10,<2",
+  "numpy>=2,<3",
+  "pandas>=2.2,<3",
+  "pillow>=11,<13",
+  "plotly>=6,<7",
+  "pyarrow>=18,<24",
+  "requests>=2.32,<3",
+  "scikit-learn>=1.5,<2",
+  "seaborn>=0.13,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9", "ruff>=0.9,<1"]
+
+[project.scripts]
+nba-second-options = "nba_second_options_single_season:main"
+
+[tool.setuptools]
+py-modules = ["nba_second_options_single_season"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nba_second_options*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-09-11T03:01:05.741758+00:00",
+  "configuration": {
+    "start_season": "1999-00",
+    "end_season": "2025-26",
+    "min_games": 8,
+    "min_mpg": 15,
+    "timeout": 45,
+    "max_retries": 5,
+    "request_delay": 1.25,
+    "cache_dir": "../work/data_cache",
+    "output_dir": "analysis",
+    "offline": true,
+    "refresh_cache": false,
+    "strict_metrics": false,
+    "demo": false
+  },
+  "rows": 108,
+  "demo": false,
+  "artifacts": [
+    "second_option_runs.csv",
+    "data_quality_report.md",
+    "era_environment.csv",
+    "championship_second_option_scorecard.csv",
+    "championship_second_option_scorecard.md",
+    "championship_second_option_scorecard.png",
+    "executive_summary.md",
+    "overall_top_10_one_run_per_player.csv",
+    "overall_top_10_one_run_per_player.md",
+    "overall_top_10_one_run_per_player_scorecard.png",
+    "final_ranking_robustness.csv",
+    "final_ranking_robustness.md"
+  ],
+  "python": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:34:53) [Clang 19.1.7 ]"
+}

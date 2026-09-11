@@ -1,0 +1,41 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+data/cache/
+analysis_outputs/
+demo_outputs/
+analysis/season_failures.json
+.DS_Store
+*.log
+GITHUB_PUBLISHING.md
+
+# Official NBA/NBAE/Getty imagery is available locally for editorial previews,
+# but external redistribution rights are not asserted by this repository.
+assets/action_shots/*.png
+assets/headshots/*.png
+analysis/linkedin_top_10_one_run_per_player.png
+analysis/linkedin_top_10_with_headshots.png
+analysis/second_option_context_map_with_headshots.png
+
+# Keep the repository's analysis folder curated. The pipeline may create more
+# local diagnostics, but only the current final evidence bundle is committed.
+analysis/*
+!analysis/championship_second_option_scorecard.csv
+!analysis/championship_second_option_scorecard.md
+!analysis/championship_second_option_scorecard.png
+!analysis/data_quality_report.md
+!analysis/era_environment.csv
+!analysis/executive_summary.md
+!analysis/final_methodology.md
+!analysis/final_ranking_robustness.csv
+!analysis/final_ranking_robustness.md
+!analysis/methodology_research_report.md
+!analysis/overall_top_10_one_run_per_player.csv
+!analysis/overall_top_10_one_run_per_player.md
+!analysis/overall_top_10_one_run_per_player_scorecard.png
+!analysis/role_pairing_audit.csv
+!analysis/role_pairing_audit.md
+!analysis/run_manifest.json
+!analysis/second_option_runs.csv
