@@ -59,7 +59,9 @@ def plot_tactical_fit_mix(ranking: pd.DataFrame, output: Path) -> Path:
                   fontsize=11, labelpad=14)
     ax.tick_params(axis="x", colors=MUTED, labelsize=9)
     ax.tick_params(axis="y", colors=INK, labelsize=10.5, length=0, pad=12)
-    ax.grid(axis="x", color=GRID, alpha=.35, linewidth=.8)
+    # The stacked bars already show the 0-100 structure. Vertical gridlines cut
+    # through the color blocks and make the graphic feel busier than it is.
+    ax.grid(False)
     ax.grid(axis="y", visible=False)
     for spine in ax.spines.values():
         spine.set_visible(False)
