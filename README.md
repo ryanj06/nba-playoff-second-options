@@ -4,15 +4,17 @@
 [![CI](https://github.com/ryanj06/nba-playoff-second-options/actions/workflows/ci.yml/badge.svg)](https://github.com/ryanj06/nba-playoff-second-options/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-This started with one question: who had the best single-postseason run as a No. 2
-since 2000? I built the dataset from every team that reached at least the
-Conference Finals.
+I built this project because most conversations about great second options end up
+being lists of points per game. That misses the interesting part. The best No. 2s
+did not all have the same job: some created shots when the star was trapped, some
+stretched the floor, and others covered the biggest holes on defense.
 
-I treat “second option” as a role, not the second name in the scoring column. The
-code looks at who ran the offense, who carried the scoring and creation load, and
-what each player was asked to do. The #1/#2 calls are all published in the role
-audit. To qualify, a player needs eight playoff games, 15 minutes per game, and a
-real role in his team's last series.
+The dataset includes every team that reached at least the Conference Finals since
+2000. I assigned the roles by looking at how each offense actually worked—not by
+automatically calling the second-leading scorer the No. 2. Every pairing is in
+the role audit so the judgment calls are easy to check. Players also had to appear
+in at least eight playoff games, average 15 minutes, and play a meaningful role in
+their team's final series.
 
 ## Headline result
 
@@ -211,16 +213,16 @@ results hold up and which ones depend on a specific choice.
 
 ## Data-source policy
 
-NBA Stats via `nba_api` is primary. Basketball-Reference supplies BPM, VORP,
-Win Shares, and regular-season team SRS.
-Every response is cached with provenance metadata. The code uses slow requests,
-normal retries, and no anti-bot circumvention. If a public page is unavailable,
-the metric is recorded as `NOT_MODELED` unless a valid cached response exists.
+Most of the data comes from NBA Stats through `nba_api`. I use
+Basketball-Reference for BPM, VORP, Win Shares, and team SRS. The downloads are
+cached, along with the source and retrieval details, so the analysis can be
+reproduced without hitting the same pages every time.
 
-Historical play-type, shot-clock, catch-and-shoot, and rim-defense coverage is
-uneven. Missing tracking is never filled with zero or an invented estimate.
-The pipeline begins tracking requests at 2013-14, the NBA optical-tracking era;
-earlier runs are explicitly marked `NOT_MODELED` for those fields.
+Some of the more detailed stats simply do not exist for older playoff runs. The
+NBA's tracking era began in 2013-14, and even the early tracking seasons have
+gaps in play-type, shot-clock, catch-and-shoot, and rim-defense data. When a
+number is unavailable, I label it `NOT_MODELED`. I do not replace it with zero or
+make up an estimate from an unrelated box-score stat.
 
 ## Responsible use and limitations
 
