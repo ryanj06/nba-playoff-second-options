@@ -163,4 +163,22 @@ def plot_opponent_srs_paths(ranking: pd.DataFrame, output: Path) -> Path:
 def save_linkedin_visuals(ranking: pd.DataFrame, output: Path) -> list[Path]:
     """Create two distinct explanatory graphics to accompany the leaderboard."""
     output.mkdir(parents=True, exist_ok=True)
-    return [plot_tactical_fit_mix(ranking, output), plot_opponent_srs_paths(ranking, output)]
+    if ranking.empty:
+        return []
+
+    available = set(ranking.columns)
+    shared = {"SEASON", "PLAYER_NAME", "PRIMARY_PLAYER_NAME", "POSTSEASON_FINISH"}
+    tactical = shared | {
+        "PRESSURE_VALVE_FIT",
+        "GRAVITY_FIT",
+        "DEFENSIVE_COVER_FIT",
+        "COMPLEMENT_FIT_COVERAGE",
+    }
+    opponent = shared | {"OPPONENT_SRS_WEIGHTED", "OPPONENT_SRS_MAX"}
+
+    paths: list[Path] = []
+    if tactical <= available:
+        paths.append(plot_tactical_fit_mix(ranking, output))
+    if opponent <= available:
+        paths.append(plot_opponent_srs_paths(ranking, output))
+    return paths

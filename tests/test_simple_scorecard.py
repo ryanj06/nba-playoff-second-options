@@ -6,6 +6,7 @@ from nba_second_options.simple_scorecard import (
     geometric_mean,
     weighted_geometric_mean,
 )
+from nba_second_options.visuals import save_linkedin_visuals
 
 
 def test_geometric_mean_requires_complete_layers():
@@ -47,3 +48,14 @@ def test_championship_scorecard_filters_ineligible_nonchampions(monkeypatch):
     result = championship_scorecard(frame)
     assert result.PLAYER_NAME.tolist() == ["A"]
     assert result.RANK.tolist() == [1]
+
+
+def test_linkedin_visuals_skip_when_optional_inputs_are_missing(tmp_path):
+    ranking = pd.DataFrame({
+        "SEASON": ["2019-20"],
+        "PLAYER_NAME": ["Demo Player"],
+        "PRIMARY_PLAYER_NAME": ["Demo Star"],
+        "POSTSEASON_FINISH": ["Champion"],
+    })
+
+    assert save_linkedin_visuals(ranking, tmp_path) == []
