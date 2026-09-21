@@ -253,33 +253,43 @@ Final = clip(Core + A_finish + A_srs + A_terminal, 0, 100)
 Context can move the score from `−1.0` to `+4.5` points. At least 95.5 points of
 the 100-point scale still come from production, full-run value, role, and fit.
 
-## What I left out
+## What I chose not to score
 
-- Raw on/off or pair net rating: too sensitive to teammates, opponents, and
-  deployment; retained only as descriptive evidence.
-- Awards, reputation, or manually assigned “clutch” points.
-- A universal two-way bonus that would demand rim protection from guards.
-- Invented pre-tracking iso, late-clock, matchup, or rim-deterrence data.
-- A trained title-prediction model, because that would answer “which team won?”
-  rather than “how good was this second option?”
+- **Raw on/off and pair net rating:** These numbers swing with bench units,
+  matchups, and coaching decisions. I keep them for context, but they do not
+  affect the ranking.
+- **Awards, reputation, and a made-up clutch bonus:** The score is based on what
+  happened during that playoff run, not the player's résumé or a subjective
+  label.
+- **A generic two-way bonus:** Defense matters when it fits the player's role and
+  fills a need beside the No. 1. The model does not expect a small guard to
+  provide the same defensive value as a rim-protecting big.
+- **Estimated tracking stats for older seasons:** If iso, late-clock, matchup, or
+  rim-deterrence data was never tracked, I leave it missing instead of trying to
+  recreate it from the box score.
+- **A model trained to predict champions:** That would mostly learn which teams
+  were strongest. This project is trying to evaluate the second option's run,
+  not predict the series winner.
 
 ## The cases people will probably ask about
 
 - **2020 Anthony Davis:** He is No. 1 because 27.7 PPG, 66.5% TS, an 8.7 BPM, 4.5
   Win Shares, elite finishing, and interior defense add up to the best base
   profile. His easier opponent path costs 0.38 points.
-- **2023 vs. 2020 Murray:** 2020 has the better shooting/scoring rate; 2023 has
-  the stronger responsibility and fit profile, then finished the job with a
-  title. The 2023 run ranks higher.
-- **2016 Kyrie vs. 2020 Murray:** Their cores are close enough that the title,
-  deepest-round performance, and stronger SRS path move Kyrie ahead.
-- **2004 Shaq:** BPM does not directly punish him for making no threes. His rate
-  and cumulative scores are elite; his Finals run and difficult path move him
-  above 2020 Murray.
+- **2023 Jamal Murray:** His 2020 run had the hotter shooting numbers, but 2023
+  came with more playmaking responsibility, a better fit score, and a title. I
+  use 2023 as his representative run.
+- **2016 Kyrie Irving:** His scoring and shot creation held up through the
+  Finals, and he faced the toughest opponent path in the public top ten. That
+  combination puts the run eighth overall.
+- **2004 Shaquille O'Neal:** BPM does not punish him for making no threes. His
+  scoring rate, efficiency, cumulative value, and difficult Finals path still
+  produce a top-ten profile.
 - **2010 Pau Gasol:** His 4.3 Win Shares, interior responsibility, title, and
   cumulative workload place him 10th in the one-run-per-player presentation.
-- **2011 Wade:** His individual numbers remain elite. The smaller team-context
-  bonus keeps a Finals loss from jumping to No. 2 on box-score dominance alone.
+- **2011 Dwyane Wade:** His individual numbers remain elite, but the smaller
+  team-context bonus keeps a Finals loss from jumping to No. 2 on box-score
+  dominance alone.
 
 ## How stable is the list?
 
