@@ -4,19 +4,24 @@
 [![CI](https://github.com/ryanj06/nba-playoff-second-options/actions/workflows/ci.yml/badge.svg)](https://github.com/ryanj06/nba-playoff-second-options/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-I built this project because most conversations about great second options end up
-being lists of points per game. That misses the interesting part. The best No. 2s
-did not all have the same job: some created shots when the star was trapped, some
-stretched the floor, and others covered the biggest holes on defense.
+My friends and I used to debate the best first options on championship teams. But
+as roster construction became a bigger part of how we talked about the NBA, I
+found myself more interested in the player next to the superstar.
 
-The dataset includes every team that reached at least the Conference Finals since
-2000. I assigned the roles by looking at how each offense actually worked—not by
-automatically calling the second-leading scorer the No. 2. Every pairing is in
-the role audit so the judgment calls are easy to check. Players also had to appear
-in at least eight playoff games, average 15 minutes, and play a meaningful role in
-their team's final series.
+A great second option can completely change what a team is capable of. Some take
+over the offense when the No. 1 gets trapped. Some provide the spacing that opens
+everything up. Others cover the team's biggest weakness on defense. That made me
+wonder: who had the best single-playoff run as a No. 2 since 2000?
 
-## What came out on top
+To answer it, I studied every team that reached at least the Conference Finals. I
+assigned the roles based on how each team actually played—not simply who finished
+second in scoring. Every #1/#2 pairing is available in the role audit so the
+close calls and judgment decisions are easy to check.
+
+Players needed at least eight playoff games, 15 minutes per game, and a meaningful
+role in their team's final series to qualify.
+
+## Where the ranking landed
 
 **2020 Anthony Davis** finishes first. I limited the public list to one run per
 player so it does not become three versions of the same star:
