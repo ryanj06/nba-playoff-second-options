@@ -1,6 +1,6 @@
 # Data Quality Report
 
-Generated: 2026-09-11T03:00:59.006921+00:00
+Generated: 2026-09-21T17:39:38.944831+00:00
 
 Rows: **108**
 
@@ -17,4 +17,4 @@ Rows: **108**
 | RIM_DFG_PCT | 52 | 56 | 48.1% |
 | LATE_CLOCK_FGA | 52 | 56 | 48.1% |
 
-Missing means `NOT_MODELED`, not zero impact.
+A missing field stays `NOT_MODELED`; it is never treated as zero.

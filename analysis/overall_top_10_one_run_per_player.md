@@ -1,6 +1,6 @@
 # Top 10 Second Options: One Run Per Player
 
-This is the presentation-friendly view. The underlying analytical data still keeps every player-season run; only each player's highest-rated run appears here.
+For this list, each player can appear once. The full dataset still includes every qualifying run.
 
 | Rank | Run | Finish | #1 star | Core | Context | Final |
 |---:|---|---|---|---:|---:|---:|

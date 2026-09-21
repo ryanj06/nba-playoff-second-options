@@ -1,110 +1,102 @@
-# Research-backed methodology for playoff second-option runs
+# How I Built the Second-Option Ranking
 
-## Executive conclusion
+## The basic problem
 
-There is no published statistic—and no defensible training label—that yields an
-objectively correct set of weights for “best second option.” Championship outcome
-is team-dependent, expert rankings are subjective, and single-postseason lineup
-samples are too sparse to fit a stable causal model across 2000–2026. The sound
-approach is therefore a transparent multi-criteria scorecard: define distinct
-constructs, prevent double counting, keep uncertain context bounded, publish the
-formula, and stress-test the result across plausible weights.
+There is no official “second-option value” stat, and there is no clean answer to
+train a model against. Titles depend on the whole team, expert lists reflect the
+author's preferences, and one playoff run does not provide enough lineup data to
+isolate chemistry. I ended up using a scorecard: keep the major ideas separate,
+avoid counting the same evidence twice, publish the formula, and check how much
+the result changes when the weights move.
 
-The final model gives most of the score to what the player actually did, then
-adds a small postseason-context adjustment. It produces a result that is both
-data-led and basketball-coherent: 2020 Anthony Davis ranks first; 2023 Jamal
-Murray ranks above 2020 Murray; 2016 Kyrie Irving and 2004 Shaquille O'Neal rank
-above 2020 Murray; and 2010 Pau Gasol appears in the presentation top 10 when
-each player is represented by only his best run.
+Most of the score comes from the player's own postseason. Team result, opponent
+strength, and play in the final series make small adjustments. With that setup,
+2020 Anthony Davis finishes first. The model also puts 2023 Murray over 2020
+Murray, moves 2016 Kyrie and 2004 Shaq ahead of the bubble run, and places 2010
+Pau Gasol in the one-run-per-player top ten.
 
-## What the research supports
+## What I took from the research
 
-### Use several evidence types, not one all-in-one statistic
+### No single metric can do the whole job
 
-Basketball-Reference defines BPM as a box-score-based estimate of points above
-league average per 100 possessions. It explicitly warns that box-score defense
-cannot capture positioning, communication, deterrence, and other important work.
-BPM is a rate statistic; VORP adds playing time. This supports using BPM as one
-rate signal—not the whole answer—and separating rate performance from cumulative
-run value. [BPM methodology](https://www.basketball-reference.com/about/bpm2.html)
+Basketball-Reference defines BPM as a box-score estimate of points above league
+average per 100 possessions. Its documentation notes that box-score defense
+misses positioning, communication, and deterrence. I use BPM as one rate signal,
+not the final verdict. VORP goes in a separate full-run bucket because it adds
+playing time. [BPM methodology](https://www.basketball-reference.com/about/bpm2.html)
 
-Win Shares allocates team success to players and is constructed from player,
-team, and league inputs. That makes it useful as one cumulative signal but not an
-independent truth or a pure individual measure. It is paired with VORP rather
-than used alone. Minutes are not added separately because both cumulative
-statistics already incorporate playing time. [Win Shares methodology](https://www.basketball-reference.com/about/ws.html)
+Win Shares uses player, team, and league inputs to divide team success among the
+roster. I pair it with VORP rather than treating it as an independent truth.
+Minutes are not added again because both statistics already account for playing
+time. [Win Shares methodology](https://www.basketball-reference.com/about/ws.html)
 
-### Adjust for role and teammate fit, but do not claim causal isolation
+### Fit matters, but this does not isolate chemistry
 
-Research on regularized adjusted plus-minus finds that even opponent- and
-teammate-adjusted metrics retain complementarity effects; basketball players are
-not randomly assigned to teammates, so the necessary counterfactuals are largely
-unobserved. The model therefore calls its fit layer **compatibility evidence**,
-not “chemistry caused by the second option.” [PLOS One study](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0237920)
+Even adjusted plus-minus retains teammate and role effects because players are
+not randomly assigned to lineups. We never observe the clean counterfactual—what
+the same team would have done with a different No. 2 in the same possessions. I
+therefore call this part **fit evidence**, not isolated chemistry.
+[PLOS One study](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0237920)
 
-Recent lineup-RAPM work also shows why raw lineup ratings are dangerous in short
-samples: an average lineup may have only a few dozen possessions, and opponent
-quality materially affects the result. That supports excluding raw on/off delta
-from the rank and using coverage shrinkage wherever tracking or lineup evidence
-is incomplete. [L-RAPM paper](https://arxiv.org/abs/2601.15000)
+Lineup RAPM research points to the same problem: many playoff lineups only play a
+few dozen possessions, and opponent quality changes the result. Raw on/off stays
+in the dataset as context, but it does not enter the ranking. Missing fit evidence
+is pulled toward neutral instead of being treated as fact.
+[L-RAPM paper](https://arxiv.org/abs/2601.15000)
 
-### Include opponent quality, but only as a modifier
+### Opponent quality belongs in the margins
 
-Basketball-Reference defines SRS as a team rating based on average point
-differential and strength of schedule, denominated in points above or below
-average. It is a reasonable description of the quality of opponents on a playoff
-path, but it is still a regular-season team estimate—not a matchup-specific
-player statistic. The model therefore limits SRS to one half-point of adjustment
-in either direction. [Basketball-Reference glossary](https://www.basketball-reference.com/about/glossary.html)
+SRS measures team quality using point differential and schedule strength. It is
+useful for describing a playoff path, but it is still a regular-season team
+number—not a player matchup grade. I cap its effect at half a point in either
+direction. [Basketball-Reference glossary](https://www.basketball-reference.com/about/glossary.html)
 
-### Use official possession-aware definitions
+### Usage does not tell us who ran the team
 
-The NBA defines TS% as points divided by `2 × (FGA + 0.44 × FTA)` and usage as the
-share of team plays a player uses while on court. Usage records possession
-endings, not who organizes the offense, which is why it cannot identify the #1
-option by itself. [NBA Stats glossary](https://www.nba.com/stats/help/glossary)
+The NBA defines TS% as points divided by `2 × (FGA + 0.44 × FTA)`. Usage measures
+how many possessions a player finishes while on the floor; it does not tell us
+who organized the offense. That is why the role audit uses more than usage alone.
+[NBA Stats glossary](https://www.nba.com/stats/help/glossary)
 
-### Do not pretend the weights were “discovered” without a target
+### The weights are choices, not discoveries
 
-Penalized basketball models can select tuning parameters by cross-validation
-when they have a predictive outcome. This project has no comparable ground-truth
-label for historical second-option quality. Training weights to predict titles
-would mostly teach the model team strength and then circularly reward players for
-winning. The weights below are therefore declared decision weights, and their
-uncertainty is tested rather than hidden. [Penalized regression research](https://arxiv.org/abs/1301.3523)
+Predictive models can tune parameters when they have a real target. This project
+does not. Training on titles would mostly teach team strength and then reward
+players for the outcome used as the label. I chose the weights directly and test
+them across a wide range instead of presenting them as fitted coefficients.
+[Penalized regression research](https://arxiv.org/abs/1301.3523)
 
-## Population and role assignment
+## Who qualifies and how roles are assigned
 
-One observation is one player-team-postseason run. The population includes every
+Each row is one player, one team, and one postseason. The dataset includes every
 team reaching at least the Conference Finals from the 2000 playoffs through the
 latest completed season. A player must have at least eight postseason games,
 15 minutes per game, and meaningful participation in at least half of the team's
 deepest-round games.
 
-The #1 is the structural offensive engine, not automatically the leading scorer
-or usage leader. The proposal model combines scoring load, creation, impact, and
-minutes. Every proposed #1/#2 pairing is preserved in the audit, and reviewed
-historical overrides remain explicit. This is why Nash can be the #1 beside
-Stoudemire, Billups beside Hamilton, and Jokić beside Murray.
+The No. 1 is the player the offense is built around, not automatically the top
+scorer or usage leader. The first pass combines scoring load, creation, impact,
+and minutes. Every proposed pairing stays in the audit, including manual
+corrections. That is why Nash can be the No. 1 beside Stoudemire, Billups beside
+Hamilton, and Jokić beside Murray.
 
-## Era normalization
+## Comparing different eras
 
-All percentile-style inputs use the same postseason comparison population and a
+All percentile inputs use the same postseason comparison group and a
 centered nearby-era window. For run `i`, metric `x`, and reference set `R_i`:
 
 ```text
 p_i(x) = 100 × [count(x_j < x_i) + 0.5 × count(x_j = x_i)] / |R_i|
 ```
 
-The reference set uses the current season twice and the adjacent seasons once,
-which preserves local era context without relying on a single tiny season. The
-raw data remain in the output so the percentile can always be audited.
+The reference set uses the current season twice and the adjacent seasons once.
+That keeps the comparison close to the player's era without relying on one small
+playoff sample. The raw numbers remain in the output.
 
-## Component mathematics
+## The math
 
-All component scores are on a 0–100 percentile-style scale. Geometric means are
-used because they reward multi-dimensional strength and prevent one extreme
-number from fully compensating for a weak dimension:
+Every component uses a 0–100 percentile scale. I use geometric means so one huge
+number cannot completely cover for a weak part of the profile:
 
 ```text
 G(x1, …, xk) = exp[(ln x1 + … + ln xk) / k]
@@ -126,17 +118,16 @@ overall rate signal, but its defensive portion is not treated as definitive.
 V = G(percentile(VORP), percentile(Win Shares))
 ```
 
-Both inputs already convert rate production into cumulative postseason value,
-including playing time. MPG is intentionally **not** added here because doing so
-would count minutes twice and unfairly depress high-impact sixth men such as 2005
-Manu Ginóbili. This layer distinguishes a spectacular rate over a short interval
-from value sustained through a long postseason. It is why 2010 Gasol's
-playoff-leading 4.3 Win Shares matters without making Win Shares the ranking by itself.
+Both inputs already account for playing time, so I do not add MPG again. That
+would count minutes twice and work against high-impact bench players such as 2005
+Manu Ginóbili. This section separates a short hot streak from value sustained
+over a full run. It also gives 2010 Gasol credit for leading the playoffs with
+4.3 Win Shares without turning the list into a Win Shares ranking.
 [2010 playoff leaders](https://www.basketball-reference.com/playoffs/NBA_2010_leaders.html)
 
 ### R — role responsibility
 
-First define the player's strongest legitimate responsibility route:
+Responsibility can come through different jobs:
 
 ```text
 offensive route = max(percentile(team scoring share),
@@ -150,14 +141,14 @@ role route = max(offensive route, interior route)
 R = G(percentile(usage), role route, percentile(deepest-round MPG))
 ```
 
-The maximum is intentional. A guard does not need to protect the rim, and a big
-does not need point-guard assist volume, to shoulder real second-star
-responsibility. Interior responsibility is available only to the broad `BIG`
-position group; it is not a universal defense bonus.
+I take the strongest valid route. A guard should not lose points for failing to
+protect the rim, and a big should not need point-guard assist numbers to carry a
+major role. Only the broad `BIG` group can use the interior route; this is not a
+blanket defense bonus.
 
-### F — complementary-fit evidence
+### F — fit beside the primary star
 
-Secondary skill supply has three channels:
+The No. 2 can fill three types of need:
 
 ```text
 creation = usage + assist load + decision quality + available iso/late-clock data
@@ -165,14 +156,14 @@ scalable offense = max(perimeter off-ball gravity, interior gravity)
 defense = role- and nearby-era-adjusted defensive evidence
 ```
 
-The primary star's needs are estimated from creation burden, shooting/off-ball
-capability, and defensive capability. Need fulfillment is:
+I estimate the primary star's needs from creation burden, shooting and off-ball
+value, and defense. The fit calculation is:
 
 ```text
 need_fit = Σ(available need_k × skill_k) / Σ(available need_k)
 ```
 
-Shared offensive strengths can also amplify each other:
+Two offensive strengths can also work together:
 
 ```text
 amplification = mean(sqrt(secondary creation × primary creation),
@@ -181,11 +172,11 @@ amplification = mean(sqrt(secondary creation × primary creation),
 raw_fit = sqrt(need_fit × amplification)
 ```
 
-Defense is included only where the primary's modeled need and the secondary's
-relevant supply support it. Shared defense is not automatically rewarded because
-a second rim protector may be less necessary beside an elite defensive big.
+Defense only helps this section when it fills a modeled need. Two good defenders
+are not automatically treated as a perfect fit; another rim protector may add
+less beside an elite defensive big than he would beside a weak one.
 
-Missing historical evidence is shrunk toward neutral rather than set to zero:
+When evidence is missing, the fit score moves toward neutral rather than zero:
 
 ```text
 F = coverage × raw_fit + (1 − coverage) × 50
@@ -193,32 +184,31 @@ F = coverage × raw_fit + (1 − coverage) × 50
 
 Tracking fields that do not exist for an era remain `NOT_MODELED`.
 
-## Core score
+## The base score
 
-The final declared core weights are:
+These are the weights I use:
 
-| Component | Weight | Reason for scale |
+| Component | Weight | Why |
 |---|---:|---|
-| Observed rate performance | 43% | Largest share; the player's actual postseason remains primary |
-| Cumulative run value | 22% | Enough to check short hot streaks and reward full-run availability |
-| Role responsibility | 15% | Distinguishes true second-star burden from low-load efficiency |
-| Complementary fit | 20% | Large enough for the project's tactical question, below production |
+| Observed rate performance | 43% | The player's actual postseason should matter most |
+| Cumulative run value | 22% | Rewards value sustained across the run |
+| Role responsibility | 15% | Separates major second-star work from low-load efficiency |
+| Fit beside the primary star | 20% | Enough to matter without outweighing production |
 
 ```text
 Core = exp(0.43 ln P + 0.22 ln V + 0.15 ln R + 0.20 ln F)
 ```
 
-These numbers are not fitted coefficients. They satisfy four predeclared
-guardrails: production is the plurality; production plus cumulative value is
-65%; fit cannot outweigh observed play; and no single contextual judgment can
-dominate the result.
+These are judgment weights, not fitted coefficients. Production is the largest
+piece, production plus full-run value equals 65%, fit cannot outweigh observed
+play, and no one context adjustment can take over the ranking.
 
-## Bounded postseason context
+## Small postseason adjustments
 
 ### Opponent SRS path
 
-For each series `s`, the opponent's regular-season SRS is weighted by games faced
-and a modest later-round multiplier:
+For each series, I weight the opponent's regular-season SRS by games faced and
+give later rounds a small bump:
 
 ```text
 w_s = games_s × [1 + 0.15 × (series_order_s − 1)]
@@ -230,8 +220,7 @@ S = G(percentile(path_SRS), percentile(max opponent SRS)))
 A_srs = clip[0.5 × (S − 50) / 50, −0.5, +0.5]
 ```
 
-This gives credit for a difficult path but cannot move a run by more than half a
-point.
+This gives some credit for a hard path, with a half-point cap.
 
 ### Deepest-round performance
 
@@ -242,7 +231,7 @@ T = G(percentile(deepest-round PPG), percentile(deepest-round TS%),
 A_terminal = clip[0.5 × (percentile(T) − 50) / 50, −0.5, +0.5]
 ```
 
-This is deliberately small because one series is a noisy sample.
+One series is noisy, so this adjustment is also capped at half a point.
 
 ### Run completion
 
@@ -252,9 +241,8 @@ A_finish = 0.0  if Conference Finals exit
            3.5  if champion
 ```
 
-The championship adjustment is meaningful but bounded: a conference-finalist
-with a core score more than 3.5 points better still ranks ahead of a champion.
-It rewards completion of the run without making the score a ring count.
+A title matters, but it does not erase the base score. A Conference Finalist with
+a base score more than 3.5 points higher still finishes ahead of a champion.
 
 ### Final score
 
@@ -262,11 +250,10 @@ It rewards completion of the run without making the score a ring count.
 Final = clip(Core + A_finish + A_srs + A_terminal, 0, 100)
 ```
 
-The total contextual movement ranges from `−1.0` to `+4.5` points. At least 95.5%
-of the possible 100-point scale therefore comes from the player's production,
-cumulative value, responsibility, and fit.
+Context can move the score from `−1.0` to `+4.5` points. At least 95.5 points of
+the 100-point scale still come from production, full-run value, role, and fit.
 
-## What is intentionally not in the final score
+## What I left out
 
 - Raw on/off or pair net rating: too sensitive to teammates, opponents, and
   deployment; retained only as descriptive evidence.
@@ -276,14 +263,14 @@ cumulative value, responsibility, and fit.
 - A trained title-prediction model, because that would answer “which team won?”
   rather than “how good was this second option?”
 
-## How to read the controversial cases
+## The cases people will probably ask about
 
-- **2020 Anthony Davis:** No. 1. His 27.7 PPG, 66.5% TS, 8.7 BPM, 4.5 Win Shares,
-  elite finishing, interior defense, and fit beside LeBron create the strongest
-  core score. His easier SRS path costs only 0.38 points, not an entire domain.
+- **2020 Anthony Davis:** He is No. 1 because 27.7 PPG, 66.5% TS, an 8.7 BPM, 4.5
+  Win Shares, elite finishing, and interior defense add up to the best base
+  profile. His easier opponent path costs 0.38 points.
 - **2023 vs. 2020 Murray:** 2020 has the better shooting/scoring rate; 2023 has
-  the stronger responsibility/fit profile and completed a title run. The final
-  contextual model ranks 2023 higher.
+  the stronger responsibility and fit profile, then finished the job with a
+  title. The 2023 run ranks higher.
 - **2016 Kyrie vs. 2020 Murray:** Their cores are close enough that the title,
   deepest-round performance, and stronger SRS path move Kyrie ahead.
 - **2004 Shaq:** BPM does not directly punish him for making no threes. His rate
@@ -291,17 +278,14 @@ cumulative value, responsibility, and fit.
   above 2020 Murray.
 - **2010 Pau Gasol:** His 4.3 Win Shares, interior responsibility, title, and
   cumulative workload place him 10th in the one-run-per-player presentation.
-- **2011 Wade:** His rate performance remains elite, but the bounded system no
-  longer lets a losing Finals run rank second solely from box-score dominance.
+- **2011 Wade:** His individual numbers remain elite. The smaller team-context
+  bonus keeps a Finals loss from jumping to No. 2 on box-score dominance alone.
 
-## Uncertainty and reproducibility
+## How stable is the list?
 
-The pipeline draws 20,000 alternative core-weight combinations from documented
-ranges and re-ranks every eligible run with the same bounded context rules. These
-are **sensitivity frequencies**, not statistical confidence intervals. Close
-scores should be described as tiers, not as proof that No. 7 is meaningfully
-better than No. 8.
+I rerun the list 20,000 times using different weight combinations from the ranges
+in the methodology. The percentages are **sensitivity frequencies**, not
+confidence intervals. If two players are close, I treat them as the same tier.
 
-Every SRS table, NBA Stats response, and Basketball-Reference advanced table is
-cached with provenance. Missing fields are tagged `NOT_MODELED`; failures are not
-silently converted to zeros.
+The SRS tables, NBA Stats responses, and Basketball-Reference tables are cached
+with source metadata. Missing fields stay `NOT_MODELED`; they never become zero.

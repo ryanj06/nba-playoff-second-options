@@ -275,7 +275,7 @@ def data_quality(frame: pd.DataFrame) -> str:
         modeled = int(frame[metric].notna().sum()) if metric in frame else 0
         lines.append(f"| {metric} | {modeled} | {len(frame)-modeled} | "
                      f"{modeled/len(frame) if len(frame) else 0:.1%} |")
-    return "\n".join(lines + ["", "Missing means `NOT_MODELED`, not zero impact."])
+    return "\n".join(lines + ["", "A missing field stays `NOT_MODELED`; it is never treated as zero.", ""])
 
 
 def save_era_context(frame: pd.DataFrame, output: Path) -> list[Path]:
@@ -287,29 +287,8 @@ def save_era_context(frame: pd.DataFrame, output: Path) -> list[Path]:
         return []
     environment = frame[columns].drop_duplicates("SEASON").sort_values("SEASON")
     csv_path = output / "era_environment.csv"
-    md_path = output / "era_methodology.md"
     environment.to_csv(csv_path, index=False)
-    lines = ["# Era Adjustment Methodology", "",
-             "Season context is calculated from every playoff rotation player meeting the "
-             "8-game and 15-MPG qualifier—not only Conference Finalists.", "",
-             "- Scoring volume uses points per 75 possessions.",
-             "- Efficiency uses true shooting percentage relative to the season playoff baseline.",
-             "- Usage, assist burden, and three-point volume are evaluated within season.",
-             "- Tracking and archetype metrics use a centered three-season window with the "
-             "current season receiving double weight.",
-             "- Missing historical tracking remains `NOT_MODELED`; it is never backfilled as zero.",
-             "- The leaderboard uses observed production only; fit remains descriptive.",
-             "- Candidates must materially participate in their team's terminal series.", "",
-             "| Season | Players | Pace | OffRtg | TS% | 3PA rate | FTA rate |",
-             "|---|---:|---:|---:|---:|---:|---:|"]
-    for _, row in environment.iterrows():
-        lines.append(
-            f"| {row.SEASON} | {int(row.ERA_ENVIRONMENT_SAMPLE_PLAYERS)} | "
-            f"{row.ERA_PLAYOFF_PACE:.1f} | {row.ERA_PLAYOFF_OFF_RATING:.1f} | "
-            f"{row.ERA_PLAYOFF_TS_PCT:.1%} | {row.ERA_PLAYOFF_3PA_RATE:.1%} | "
-            f"{row.ERA_PLAYOFF_FTA_RATE:.1%} |")
-    md_path.write_text("\n".join(lines))
-    return [csv_path, md_path]
+    return [csv_path]
 
 
 def plot_championship_sensitivity(sensitivity: pd.DataFrame, output: Path) -> Path:
@@ -370,7 +349,8 @@ def plot_championship_sensitivity(sensitivity: pd.DataFrame, output: Path) -> Pa
     return path
 
 
-def save_outputs(frame: pd.DataFrame, config: PipelineConfig) -> list[Path]:
+def _save_legacy_diagnostics(frame: pd.DataFrame, config: PipelineConfig) -> list[Path]:
+    """Generate the larger internal diagnostic bundle used during model development."""
     output = config.output_dir
     output.mkdir(parents=True, exist_ok=True)
     csv, parquet = output / "second_option_runs.csv", output / "second_option_runs.parquet"
@@ -487,3 +467,36 @@ def save_outputs(frame: pd.DataFrame, config: PipelineConfig) -> list[Path]:
     return [csv, parquet, summary, quality, top_csv, top_md, champions_csv,
             champions_md, all_champions_csv, all_champions_md, *era_paths,
             sensitivity_csv, sensitivity_md, sensitivity_png, manifest] + charts + simple_paths
+
+
+def save_outputs(frame: pd.DataFrame, config: PipelineConfig) -> list[Path]:
+    """Write the current, curated analysis bundle used by the public project."""
+    output = config.output_dir
+    output.mkdir(parents=True, exist_ok=True)
+    runs_csv = output / "second_option_runs.csv"
+    quality = output / "data_quality_report.md"
+    frame.to_csv(runs_csv, index=False)
+    quality.write_text(data_quality(frame))
+    era_paths = save_era_context(frame, output)
+    scorecard_paths = save_simple_scorecard(frame, output)
+    generated = [runs_csv, quality, *era_paths, *scorecard_paths]
+    manifest = output / "run_manifest.json"
+    manifest.write_text(json.dumps({
+        "generated_at": utc_now(),
+        "configuration": {
+            **asdict(config),
+            "cache_dir": str(config.cache_dir),
+            "output_dir": str(output),
+        },
+        "rows": len(frame),
+        "demo": config.demo,
+        "artifacts": [path.name for path in generated],
+        "repository_evidence": [
+            "final_methodology.md",
+            "methodology_research_report.md",
+            "role_pairing_audit.csv",
+            "role_pairing_audit.md",
+        ],
+        "python": sys.version,
+    }, indent=2, default=str) + "\n")
+    return [*generated, manifest]

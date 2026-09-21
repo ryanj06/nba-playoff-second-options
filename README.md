@@ -4,19 +4,20 @@
 [![CI](https://github.com/ryanj06/nba-playoff-second-options/actions/workflows/ci.yml/badge.svg)](https://github.com/ryanj06/nba-playoff-second-options/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-This project compares individual playoff runs by NBA second options from 2000
-onward. It includes every team that reached at least the Conference Finals.
+This started with one question: who had the best single-postseason run as a No. 2
+since 2000? I built the dataset from every team that reached at least the
+Conference Finals.
 
-Instead of assuming that the second-leading scorer was automatically the second
-option, the pipeline considers who created the offense, who carried the scoring
-load, and how the team actually used each player. Every #1/#2 pairing is saved in
-an audit table so the judgment can be reviewed. Players also need at least eight
-games, 15 minutes per game, and a meaningful role in their team's final series.
+I treat “second option” as a role, not the second name in the scoring column. The
+code looks at who ran the offense, who carried the scoring and creation load, and
+what each player was asked to do. The #1/#2 calls are all published in the role
+audit. To qualify, a player needs eight playoff games, 15 minutes per game, and a
+real role in his team's last series.
 
 ## Headline result
 
-The model ranks **2020 Anthony Davis** as the strongest single-postseason second
-option since 2000. In the presentation view, each player appears only once:
+**2020 Anthony Davis** finishes first. I limited the public list to one run per
+player so it does not become three versions of the same star:
 
 1. 2020 Anthony Davis
 2. 2017 Stephen Curry
@@ -29,14 +30,28 @@ option since 2000. In the presentation view, each player appears only once:
 9. 2004 Shaquille O'Neal
 10. 2010 Pau Gasol
 
-The analytical table still retains every player-season observation. The
-one-run-per-player rule is a presentation choice, not a hidden scoring change.
+The full data still keeps every qualifying run. The one-run limit only applies to
+the graphic and top-ten list.
 
 ![Four-layer top-ten scorecard](analysis/overall_top_10_one_run_per_player_scorecard.png)
 
-The repository checks in only the final, recruiter-facing analysis bundle. A
-pipeline run may create additional diagnostics locally, but superseded drafts,
-duplicate formats, and intermediate rankings are ignored by Git.
+## Key visuals
+
+The tactical-fit chart shows what kind of problem each player solved beside the
+primary star. It separates secondary creation, scalable gravity, and
+need-specific defensive cover. It is a breakdown of playing style, not another
+ranking.
+
+![Tactical fit mix](analysis/linkedin_tactical_fit_mix.png)
+
+The opponent chart compares each player's full playoff path with the strongest
+team he faced. Competition is part of the story, but it only has a small effect
+on the final score.
+
+![Opponent SRS paths](analysis/linkedin_opponent_srs_paths.png)
+
+The repo keeps the final analysis and leaves out draft charts, duplicate exports,
+and local photo files.
 
 ## Project structure
 
@@ -53,15 +68,14 @@ nba_second_options/
   contextual_value.py # validated role-matched replacement-value estimator
   contextual_spec.py  # locked NBA feature contract and missing-data rules
   sensitivity.py  # six-domain championship robustness simulation
-  simple_scorecard.py # final four-layer ranking, bounded context, robustness test
-  headshots.py    # season-matched NBA portrait cache with dated fallbacks
-  editorial_visuals.py # social-ready headshot leaderboard and context map
+  simple_scorecard.py # final four-part ranking, small context adjustments, weight tests
+  visuals.py      # rights-safe LinkedIn and portfolio graphics
   pipeline.py     # season and full-history orchestration
   reporting.py    # charts, reports, tables, and run manifest
 ```
 
-Network access is isolated from analytical calculations, making methodology
-decisions independently testable and easy to review.
+Data collection is kept separate from the calculations, which makes the model
+easier to test, review, and reproduce.
 
 ## Installation
 
@@ -70,7 +84,7 @@ Python 3.11+ is recommended.
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
 ```
 
 For an editable development install with tests and linting:
@@ -125,21 +139,20 @@ are explicitly marked `PARTIAL` and include a coverage fraction.
 
 ## How the ranking works
 
-The main ranking is a transparent scorecard. It is separate from the experimental
-replacement-value model and from the championship-only sensitivity analysis.
+The published ranking uses the four-part score below. The experimental
+replacement-value model and championship sensitivity test are kept separate.
 
-The optional replacement-value model is evaluated chronologically: it learns from
-earlier seasons and is tested on later ones. It only produces a ranking if it
-beats a simple historical-average baseline. Its comparison holds the primary star
-and team needs constant, then replaces the second option with an era- and
-role-matched alternative.
+The optional replacement-value model trains on earlier seasons and is tested on
+later ones. I only use its ranking if it beats a historical-average baseline. In
+each comparison, the primary star and team needs stay fixed while the No. 2 is
+replaced by a similar player from the same general era and role.
 
-The headline result uses the simpler scorecard. It combines playoff production
+The main result comes from the simpler scorecard. It combines playoff production
 (43%), total value across the run (22%), role responsibility (15%), and fit with
 the primary star (20%). A small adjustment accounts for how far the team went,
 the strength of its opponents, and the player's performance in the final series.
-The weights are tested across thousands of alternatives; they are not presented
-as the only reasonable answer.
+I also rerun the model across thousands of alternative weights to see which
+results hold up and which ones depend on a specific choice.
 
 - **Qualifier:** A team appearing in playoff round 3, cross-checked by completed
   series victories. Four teams must qualify.
@@ -163,7 +176,7 @@ as the only reasonable answer.
 - **Need fulfillment:** Skill supply is weighted by the #1 star's modeled needs
   and normalized by total modeled need; versatile stars no longer mechanically
   suppress every fit score.
-- **Strength amplification:** Geometric interactions reward shared creation,
+- **Strength amplification:** Geometric interactions reward shared creation
   and gravity strengths. Defensive overlap is not automatically rewarded because
   a second rim protector can be redundant beside an elite defensive big.
 - **Role-aware defense:** Secondary defensive supply is compared within broad
@@ -172,14 +185,14 @@ as the only reasonable answer.
   amplification, with component-level coverage and `PARTIAL` flags.
 - **Final leaderboard core:** 43% rate performance, 22% cumulative run value
   from VORP and Win Shares (which already incorporate playing time),
-  15% role responsibility, and 20% coverage-shrunk complementary fit. Production
-  remains the largest domain. Missing fit evidence is pulled toward a neutral 50
-  in proportion to missing coverage rather than treated as zero.
+  15% role responsibility, and 20% fit beside the primary star. Production
+  remains the largest part. When fit data is missing, that portion moves toward
+  a neutral 50 instead of being treated as zero.
 - **Bounded postseason context:** Conference Finals/Finals/title completion adds
   0/1.5/3.5 points; opponent-SRS path and deepest-round play each move a run by at
   most 0.5 point. Opponent SRS is weighted by games faced and a modest later-round
   multiplier. Context cannot replace the player's core performance.
-- **Holistic championship scorecard:** Six separate domains preserve the
+- **Championship sensitivity check:** Six separate domains preserve the
   distinction between rate production, role burden, cumulative impact,
   terminal-series responsibility, historical defensive evidence, and
   primary-star compatibility. Championship conclusions use 50,000 uniform
@@ -211,10 +224,9 @@ earlier runs are explicitly marked `NOT_MODELED` for those fields.
 
 ## Responsible use and limitations
 
-This is an explanatory multi-criteria scorecard, not a causal player-impact
-estimate. Close scores should be interpreted as tiers. Role decisions are
-published in `analysis/role_pairing_audit.csv`; missing tracking evidence is
-marked `NOT_MODELED`; raw lineup on/off is never presented as isolated player
-value. Source terms and image rights remain with their respective owners.
-The `--demo` command uses synthetic data only and must not be presented as NBA
-research.
+This ranking compares evidence; it does not isolate a player's causal impact.
+Treat close scores as ties or tiers. The role calls are in
+`analysis/role_pairing_audit.csv`, missing tracking is labeled `NOT_MODELED`, and
+raw lineup on/off never stands in for individual value. Player photos stay out
+of the public repo because I am not claiming redistribution rights. The `--demo`
+command uses fake data and is only for testing the pipeline.

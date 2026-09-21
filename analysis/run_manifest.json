@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-11T03:01:05.741758+00:00",
+  "generated_at": "2026-09-21T17:39:42.575339+00:00",
   "configuration": {
     "start_season": "1999-00",
     "end_season": "2025-26",
@@ -28,8 +28,16 @@
     "overall_top_10_one_run_per_player.csv",
     "overall_top_10_one_run_per_player.md",
     "overall_top_10_one_run_per_player_scorecard.png",
+    "linkedin_tactical_fit_mix.png",
+    "linkedin_opponent_srs_paths.png",
     "final_ranking_robustness.csv",
     "final_ranking_robustness.md"
+  ],
+  "repository_evidence": [
+    "final_methodology.md",
+    "methodology_research_report.md",
+    "role_pairing_audit.csv",
+    "role_pairing_audit.md"
   ],
   "python": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:34:53) [Clang 19.1.7 ]"
 }

@@ -321,9 +321,9 @@ def audit_markdown(audit: pd.DataFrame) -> str:
     lines = [
         "# #1 / #2 Role Audit — Conference Finalists Since 2000",
         "",
-        "This checklist is the editorial gate before any run is ranked. A checked box should mean the pair reflects the real basketball hierarchy for that specific postseason—not merely the order of one statistic.",
+        "This file shows every #1/#2 decision before the ranking is calculated. The pairing should match how the team actually played in that postseason, not simply who ranked first and second in one stat.",
         "",
-        "The model makes two distinct decisions. Its primary-star score is 40% scoring load, 30% creation engine, 25% all-around involvement (PIE), and 5% minutes. After removing that player, its second-option score is 65% scoring load, 10% creation, 20% all-around involvement, and 5% minutes. Close margins are flagged. `OWNER_REVIEWED` rows encode corrections already supplied by the project owner. Every other row remains a proposal until reviewed.",
+        "The first pass scores the primary star using scoring load (40%), creation (30%), PIE (25%), and minutes (5%). Once that player is removed, the second-option pass uses scoring load (65%), creation (10%), PIE (20%), and minutes (5%). Close calls are flagged. `OWNER_REVIEWED` means I changed or confirmed the pairing after a basketball review; the other rows remain model proposals.",
         "",
         "Lineup net rating is intentionally excluded from role identification.",
         "",

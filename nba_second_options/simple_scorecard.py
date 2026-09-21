@@ -1,4 +1,4 @@
-"""Transparent championship scorecard for the portfolio project."""
+"""Final scorecard and public-facing ranking outputs."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from .era import rolling_era_percentile
+from .visuals import save_linkedin_visuals
 
 
 FINAL_SCORE_WEIGHTS = {
@@ -50,7 +51,7 @@ def weighted_geometric_mean(
 
 
 def attach_simple_scorecard(frame: pd.DataFrame) -> pd.DataFrame:
-    """Attach three understandable evidence layers without claiming causality."""
+    """Calculate the four-part score and capped postseason adjustments."""
     out = frame.copy()
     out["OBSERVED_PERFORMANCE_SCORE"] = geometric_mean(out[[
         "ERA_PTS75_PERCENTILE",
@@ -218,11 +219,10 @@ def scorecard_markdown(ranking: pd.DataFrame) -> str:
     lines = [
         "# Balanced Championship Second-Option Scorecard",
         "",
-        "A transparent, non-causal portfolio ranking. The score combines observed era-relative "
-        "performance (43%), cumulative run value (22%), role responsibility (15%), and "
-        "coverage-shrunk complementary-fit evidence (20%). A bounded context adjustment "
-        "then adds at most 3.5 points for run completion and +/-0.5 point each for "
-        "opponent-SRS path and deepest-round performance.",
+        "The score is 43% era-adjusted production, 22% total playoff value, "
+        "15% role responsibility, and 20% fit beside the primary star. Winning the title "
+        "can add up to 3.5 points. Opponent strength and play in the final series are "
+        "limited to +/-0.5 point each.",
         "",
         "| Rank | Run | #1 star | Performance | Run value | Responsibility | Fit | Core | Context | Score |",
         "|---:|---|---|---:|---:|---:|---:|---:|---:|---:|",
@@ -241,14 +241,13 @@ def scorecard_markdown(ranking: pd.DataFrame) -> str:
         )
     lines.extend([
         "",
-        "## Interpretation",
+        "## Notes",
         "",
-        "- Championship runs are compared with the team outcome held constant.",
-        "- Defense is not a standalone scoring domain. It enters through total BPM and through "
-        "fit only when the primary-star need and secondary-player supply are modeled.",
-        "- Box-score defense is not relabeled as matchup difficulty or rim deterrence.",
-        "- This is a transparent scorecard, not a causal estimate of chemistry.",
-        "- Archetype charts explain how each player complemented the primary star.",
+        "- Every player in this table won the title, so the team result is held constant.",
+        "- Defense already appears in BPM. It also matters in the fit score when it fills "
+        "a specific need beside the primary star.",
+        "- Box-score defense is not treated as a substitute for positioning, matchups, or rim deterrence.",
+        "- The score compares postseason runs; it does not claim to isolate chemistry.",
     ])
     return "\n".join(lines)
 
@@ -262,50 +261,78 @@ def plot_scorecard(
     filename: str,
 ) -> Path:
     import matplotlib.pyplot as plt
+    from matplotlib.patches import FancyBboxPatch
 
-    top = ranking.head(10).sort_values("SIMPLE_BALANCED_SCORE").copy()
-    labels = top.PLAYER_NAME + "  '" + top.SEASON.str[-2:]
-    fig, ax = plt.subplots(figsize=(14, 9), facecolor="#0b1220")
-    ax.set_facecolor("#0b1220")
-    y = np.arange(len(top))
-    component_columns = list(FINAL_SCORE_WEIGHTS)
-    for index, (_, row) in enumerate(top.iterrows()):
-        values = row[component_columns].astype(float)
-        ax.hlines(index, values.min(), values.max(), color="#334155", linewidth=3)
+    top = ranking.head(10).copy().reset_index(drop=True)
+    background = "#07111f"
+    panel = "#0d1b2d"
+    ink = "#f8fafc"
+    muted = "#9fb0c5"
+    track = "#26384f"
+    fig, ax = plt.subplots(figsize=(16, 10), facecolor=background)
+    ax.set_facecolor(background)
+    ax.set_xlim(-3.65, 9.25)
+    ax.set_ylim(-1.25, len(top) + 1.15)
+    ax.axis("off")
     layers = [
-        ("OBSERVED_PERFORMANCE_SCORE", "Observed performance", "D", "#f8fafc"),
-        ("CUMULATIVE_IMPACT_SCORE", "Total run value", "s", "#38bdf8"),
-        ("ROLE_RESPONSIBILITY_SCORE", "Role responsibility", "o", "#fb923c"),
-        ("FIT_EVIDENCE_SCORE", "Complementary fit", "^", "#34d399"),
-        ("SCHEDULE_DIFFICULTY_SCORE", "Opponent SRS path", "P", "#f472b6"),
+        ("OBSERVED_PERFORMANCE_SCORE", "PRODUCTION", "#63c5ff"),
+        ("CUMULATIVE_IMPACT_SCORE", "RUN VALUE", "#b69cff"),
+        ("ROLE_RESPONSIBILITY_SCORE", "ROLE", "#ff9966"),
+        ("FIT_EVIDENCE_SCORE", "STAR FIT", "#5ee1a3"),
+        ("SCHEDULE_DIFFICULTY_SCORE", "OPPONENTS", "#f472b6"),
     ]
-    for column, label, marker, color in layers:
-        ax.scatter(top[column], y, marker=marker, s=72, color=color,
-                   label=label, zorder=3)
-    ax.scatter(top.SIMPLE_BALANCED_SCORE, y, marker="*", s=180, color="#fbbf24",
-               edgecolor="#0b1220", linewidth=.7, label="Balanced score", zorder=4)
-    for index, score in enumerate(top.SIMPLE_BALANCED_SCORE):
-        ax.text(102, index, f"{score:.1f}", color="white", va="center",
-                ha="right", fontsize=10, fontweight="bold")
-    ax.set_title(title, loc="left", color="white", fontsize=22,
-                 fontweight="bold", pad=20)
-    ax.text(0, 1.01, subtitle,
-            transform=ax.transAxes, color="#94a3b8", fontsize=11, va="bottom")
-    ax.set_yticks(y, labels)
-    ax.set_xlabel("Percentile-style evidence score  →", color="#cbd5e1")
-    ax.tick_params(colors="#e2e8f0")
-    ax.set_xlim(0, 105)
-    ax.grid(axis="x", color="#334155", alpha=.5)
-    ax.grid(axis="y", visible=False)
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-    legend = ax.legend(frameon=False, ncol=3, loc="lower center",
-                       bbox_to_anchor=(.5, -.18))
-    for label in legend.get_texts():
-        label.set_color("#e2e8f0")
-    fig.tight_layout(rect=(0, .06, 1, 1))
+    starts = np.array([0.0, 1.55, 3.10, 4.65, 6.20])
+    track_width = 1.02
+    score_x = 8.45
+
+    for start, (_, header, color) in zip(starts, layers, strict=True):
+        ax.text(start + track_width / 2, len(top) + .34, header, color=color,
+                fontsize=9, fontweight="bold", ha="center", va="center")
+    ax.text(score_x, len(top) + .34, "FINAL", color="#f8c35c", fontsize=9,
+            fontweight="bold", ha="center", va="center")
+
+    for row_index, (_, row) in enumerate(top.iterrows()):
+        y = len(top) - 1 - row_index
+        if row_index % 2 == 0:
+            ax.add_patch(FancyBboxPatch(
+                (-3.55, y - .42), 12.58, .84,
+                boxstyle="round,pad=0.02,rounding_size=.08",
+                facecolor=panel, edgecolor="none", zorder=0,
+            ))
+        playoff_year = int(str(row.SEASON).split("-", maxsplit=1)[0]) + 1
+        ax.text(-3.38, y + .12, str(row.PLAYER_NAME), color=ink, fontsize=11.5,
+                fontweight="bold", ha="left", va="center")
+        ax.text(-3.38, y - .18,
+                f"{playoff_year} · {row.TEAM_ABBREVIATION} · with {row.PRIMARY_PLAYER_NAME}",
+                color=muted, fontsize=8.2, ha="left", va="center")
+
+        for start, (column, _, color) in zip(starts, layers, strict=True):
+            value = float(row[column])
+            ax.plot([start, start + track_width], [y - .10, y - .10], color=track,
+                    linewidth=6, solid_capstyle="round", zorder=1)
+            endpoint = start + track_width * np.clip(value, 0, 100) / 100
+            ax.plot([start, endpoint], [y - .10, y - .10], color=color,
+                    linewidth=6, solid_capstyle="round", zorder=2)
+            ax.scatter(endpoint, y - .10, s=42, color=color, edgecolor=background,
+                       linewidth=.7, zorder=3)
+            ax.text(start + track_width / 2, y + .19, f"{value:.0f}", color=ink,
+                    fontsize=9.5, fontweight="bold", ha="center", va="center")
+
+        ax.text(score_x, y + .10, f"{row.SIMPLE_BALANCED_SCORE:.1f}", color=ink,
+                fontsize=15, fontweight="bold", ha="center", va="center")
+        ax.text(score_x, y - .21, f"context {row.TOTAL_CONTEXT_ADJUSTMENT:+.1f}",
+                color=muted, fontsize=7.5, ha="center", va="center")
+
+    ax.text(-3.55, len(top) + .88, title, color=ink, fontsize=23,
+            fontweight="bold", ha="left", va="center")
+    ax.text(-3.55, len(top) + .58, subtitle, color=muted, fontsize=10.5,
+            ha="left", va="center")
+    ax.text(-3.55, -1.00,
+            "Each category uses its own 0–100 scale so every score stays readable.",
+            color=muted, fontsize=8.5, ha="left", va="center")
+    fig.subplots_adjust(left=.035, right=.98, top=.96, bottom=.06)
     path = output / filename
-    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor=fig.get_facecolor())
+    fig.savefig(path, dpi=200, facecolor=fig.get_facecolor())
     plt.close(fig)
     return path
 
@@ -315,12 +342,12 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
     csv_path = output / "championship_second_option_scorecard.csv"
     md_path = output / "championship_second_option_scorecard.md"
     ranking.to_csv(csv_path, index=False)
-    md_path.write_text(scorecard_markdown(ranking))
+    md_path.write_text(scorecard_markdown(ranking) + "\n")
     chart_path = plot_scorecard(
         ranking,
         output,
         title="Championship Second Options Since 2000",
-        subtitle="Four core evidence layers plus a bounded postseason-context adjustment",
+        subtitle="Production, full-run value, role, fit, and a small postseason adjustment",
         filename="championship_second_option_scorecard.png",
     )
 
@@ -331,8 +358,8 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
     one_player_lines = [
         "# Top 10 Second Options: One Run Per Player",
         "",
-        "This is the presentation-friendly view. The underlying analytical data still "
-        "keeps every player-season run; only each player's highest-rated run appears here.",
+        "For this list, each player can appear once. The full dataset still includes "
+        "every qualifying run.",
         "",
         "| Rank | Run | Finish | #1 star | Core | Context | Final |",
         "|---:|---|---|---|---:|---:|---:|",
@@ -345,16 +372,16 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
             f"{row.TOTAL_CONTEXT_ADJUSTMENT:+.1f} | "
             f"{row.SIMPLE_BALANCED_SCORE:.1f} |"
         )
-    one_player_md.write_text("\n".join(one_player_lines))
+    one_player_md.write_text("\n".join(one_player_lines) + "\n")
     executive_summary = output / "executive_summary.md"
     leader = one_per_player.iloc[0]
     executive_lines = [
         "# The NBA's Top Single-Season Playoff Second-Option Runs Since 2000",
         "",
-        "The final research-backed scorecard ranks **2020 Anthony Davis** first. "
-        f"His final score is {leader.SIMPLE_BALANCED_SCORE:.1f}, built from a "
-        f"{leader.SIMPLE_BALANCED_CORE_SCORE:.1f} core plus a "
-        f"{leader.TOTAL_CONTEXT_ADJUSTMENT:+.1f} bounded postseason-context adjustment.",
+        f"**2020 Anthony Davis** finishes first at {leader.SIMPLE_BALANCED_SCORE:.1f}. "
+        f"His base score is {leader.SIMPLE_BALANCED_CORE_SCORE:.1f}; the title, opponent "
+        "path, and final-series performance add "
+        f"{leader.TOTAL_CONTEXT_ADJUSTMENT:+.1f}.",
         "",
         "## Final top 10 — one run per player",
         "",
@@ -366,15 +393,16 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
         )
     executive_lines.extend([
         "",
-        "The score uses a 43/22/15/20 core split across era-relative rate "
-        "performance, cumulative run value, role-specific responsibility, and "
-        "complementary fit. Run completion can add at most 3.5 points; opponent "
-        "SRS and deepest-round play can each move the score by only 0.5 point.",
+        "The score puts the most weight on what the player actually produced. It "
+        "combines era-adjusted production (43%), total value across the run (22%), "
+        "role responsibility (15%), and fit beside the primary star (20%). A title "
+        "can add at most 3.5 points, while opponent strength and final-round play "
+        "can each change the score by no more than 0.5 point.",
         "",
-        "Close scores are tiers, not proof of a meaningful decimal-level gap. "
-        "See `methodology_research_report.md` for formulas, sources, and limitations.",
+        "Players separated by a point or two should be read as the same tier. The formulas, "
+        "sources, and limitations are in `methodology_research_report.md`.",
     ])
-    executive_summary.write_text("\n".join(executive_lines))
+    executive_summary.write_text("\n".join(executive_lines) + "\n")
     one_player_scorecard = plot_scorecard(
         one_per_player,
         output,
@@ -382,18 +410,7 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
         subtitle="One run per player · Conference Finals or better",
         filename="overall_top_10_one_run_per_player_scorecard.png",
     )
-    from .editorial_visuals import plot_context_map, plot_headshot_leaderboard
-
-    portrait_directory = output.parent / "assets" / "headshots"
-    one_player_chart = plot_headshot_leaderboard(
-        one_per_player,
-        output,
-        portrait_directory,
-        title="TOP PLAYOFF SECOND OPTIONS SINCE 2000",
-        subtitle="One run per player · Conference Finals or better",
-        filename="linkedin_top_10_one_run_per_player.png",
-    )
-    context_map = plot_context_map(one_per_player, output, portrait_directory)
+    linkedin_visuals = save_linkedin_visuals(one_per_player, output)
     robustness = ranking_robustness(frame)
     robustness_csv = output / "final_ranking_robustness.csv"
     robustness.to_csv(robustness_csv, index=False)
@@ -401,8 +418,9 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
     robustness_lines = [
         "# Final Ranking Robustness",
         "",
-        "This is a value-weight sensitivity test, not a player-performance confidence "
-        "interval. It redraws 20,000 plausible domain weights inside the documented ranges.",
+        "I reran the ranking 20,000 times while changing the four core weights inside "
+        "the ranges listed in the methodology. These percentages show how often each "
+        "run lands in a given tier; they are not statistical confidence intervals.",
         "",
         "| Run | Finishes #1 | Top five | Top 10 |",
         "|---|---:|---:|---:|",
@@ -414,7 +432,7 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
             f"{row.ROBUSTNESS_TOP_5_PROBABILITY:.1%} | "
             f"{row.ROBUSTNESS_TOP_10_PROBABILITY:.1%} |"
         )
-    robustness_md.write_text("\n".join(robustness_lines))
+    robustness_md.write_text("\n".join(robustness_lines) + "\n")
     return [
         csv_path,
         md_path,
@@ -423,8 +441,7 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
         one_player_csv,
         one_player_md,
         one_player_scorecard,
-        one_player_chart,
-        context_map,
+        *linkedin_visuals,
         robustness_csv,
         robustness_md,
     ]

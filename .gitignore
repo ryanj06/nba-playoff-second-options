@@ -35,7 +35,18 @@ analysis/*
 !analysis/overall_top_10_one_run_per_player.csv
 !analysis/overall_top_10_one_run_per_player.md
 !analysis/overall_top_10_one_run_per_player_scorecard.png
+!analysis/linkedin_tactical_fit_mix.png
+!analysis/linkedin_opponent_srs_paths.png
 !analysis/role_pairing_audit.csv
 !analysis/role_pairing_audit.md
 !analysis/run_manifest.json
 !analysis/second_option_runs.csv
+
+# Local-only social publishing assets and optional photo tooling. These use
+# externally sourced player imagery and are not part of the public codebase.
+assets/
+LINKEDIN_POST.md
+requirements.txt
+nba_second_options/headshots.py
+nba_second_options/editorial_visuals.py
+tests/test_headshots.py

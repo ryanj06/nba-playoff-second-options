@@ -1,16 +1,16 @@
-# Final Methodology: Contextual Playoff Second-Option Value
+# How the Ranking Works
 
-## Final scoring architecture
+## The score
 
-The ranking separates four core evidence layers from a small postseason-context
-adjustment:
+Four parts make up the base score. Postseason context is added afterward and kept
+small on purpose.
 
-| Core layer | Weight |
+| Part | Weight |
 |---|---:|
 | Era-relative rate performance | 43% |
 | Cumulative run value | 22% |
 | Role-specific responsibility | 15% |
-| Coverage-shrunk complementary fit | 20% |
+| Fit beside the primary star | 20% |
 
 ```text
 Core = exp(0.43 ln P + 0.22 ln V + 0.15 ln R + 0.20 ln F)
@@ -19,17 +19,17 @@ Final = clip(Core + finish adjustment + SRS adjustment
                    + deepest-round adjustment, 0, 100)
 ```
 
-The context terms are bounded:
+The postseason adjustments are:
 
 - finish: `0.0` for a Conference Finals exit, `+1.5` for a Finals exit,
   `+3.5` for a title;
 - opponent path: `−0.5` to `+0.5`, based on opponents' regular-season SRS;
 - deepest-round play: `−0.5` to `+0.5`.
 
-Thus context can move a run by at most 4.5 points upward or 1.0 point downward;
-it cannot replace what the player actually produced.
+Put together, context can add no more than 4.5 points or subtract no more than one point.
+The player's own production still drives the result.
 
-## Core components
+## What goes into each part
 
 ```text
 P = geomean(era percentile of points/75, TS%, BPM)
@@ -45,13 +45,13 @@ R = geomean(era percentile of usage, role route,
 F = coverage × raw compatibility + (1 − coverage) × 50
 ```
 
-Complementary fit compares the second option's creation, scalable offense
+The fit score compares the second option's creation, scalable offense
 (perimeter gravity or interior gravity), and role-adjusted defense with the #1
 star's needs. Shared offensive strengths may amplify each other. Defense helps
 only when the primary-star need and secondary supply are modeled; guards do not
 receive a universal rim-protection penalty.
 
-## Opponent SRS
+## Opponent strength
 
 Each opponent's regular-season SRS is weighted by games faced and a modest 15%
 increase per later series:
@@ -60,11 +60,11 @@ increase per later series:
 series weight = games × [1 + 0.15 × (series order − 1)]
 ```
 
-The SRS score combines the weighted full path and the strongest opponent, then
-converts that result to a nearby-era percentile. Its final contribution is capped
-at half a point because SRS is team context, not player production.
+I combine the full path with the strongest opponent, then compare that number
+with nearby seasons. SRS can only move the final score by half a point because it
+describes the path, not the player's performance.
 
-## Role and defense safeguards
+## Rules for role and defense
 
 - The #1 is the structural offensive engine, not automatically the top scorer or
   usage leader; all pairings are preserved in the role audit.
@@ -78,14 +78,13 @@ at half a point because SRS is team context, not player production.
 - VORP and Win Shares already include playing time, so MPG is not counted again
   inside cumulative value. Deepest-round MPG appears only in role responsibility.
 
-## Why the weights are declared
+## Why I chose the weights this way
 
-No ground-truth historical label exists for “best second option.” Training on
-titles would produce a circular team-success model; training on expert lists
-would reproduce subjective labels. The weights therefore encode explicit
-guardrails and are stress-tested with 20,000 plausible alternatives. Sensitivity
-frequencies are not confidence intervals, and close runs should be treated as a
-tier.
+There is no accepted historical answer I can train against. If I trained the
+model on titles, it would mostly learn which teams won. If I trained it on media
+lists, it would inherit those opinions. I chose the weights openly and reran the
+ranking 20,000 times across reasonable alternatives. Those results show weight
+sensitivity, not statistical confidence. Close scores belong in the same tier.
 
-For the complete research basis, formulas, source links, limitations, and case
-interpretations, see `methodology_research_report.md`.
+The longer version, with sources and case-by-case notes, is in
+`methodology_research_report.md`.

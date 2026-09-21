@@ -1,6 +1,6 @@
 # Balanced Championship Second-Option Scorecard
 
-A transparent, non-causal portfolio ranking. The score combines observed era-relative performance (43%), cumulative run value (22%), role responsibility (15%), and coverage-shrunk complementary-fit evidence (20%). A bounded context adjustment then adds at most 3.5 points for run completion and +/-0.5 point each for opponent-SRS path and deepest-round performance.
+The score is 43% era-adjusted production, 22% total playoff value, 15% role responsibility, and 20% fit beside the primary star. Winning the title can add up to 3.5 points. Opponent strength and play in the final series are limited to +/-0.5 point each.
 
 | Rank | Run | #1 star | Performance | Run value | Responsibility | Fit | Core | Context | Score |
 |---:|---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -32,10 +32,9 @@ A transparent, non-causal portfolio ranking. The score combines observed era-rel
 | 26 | Andrew Wiggins, 2021-22 GSW | Stephen Curry | 42.1 | 71.6 | 44.1 | 56.1 | 50.5 | +3.7 | 54.2 |
 | 27 | Tony Parker, 2002-03 SAS | Tim Duncan | 21.6 | 16.5 | 28.8 | 52.3 | 25.4 | +3.4 | 28.7 |
 
-## Interpretation
+## Notes
 
-- Championship runs are compared with the team outcome held constant.
-- Defense is not a standalone scoring domain. It enters through total BPM and through fit only when the primary-star need and secondary-player supply are modeled.
-- Box-score defense is not relabeled as matchup difficulty or rim deterrence.
-- This is a transparent scorecard, not a causal estimate of chemistry.
-- Archetype charts explain how each player complemented the primary star.
+- Every player in this table won the title, so the team result is held constant.
+- Defense already appears in BPM. It also matters in the fit score when it fills a specific need beside the primary star.
+- Box-score defense is not treated as a substitute for positioning, matchups, or rim deterrence.
+- The score compares postseason runs; it does not claim to isolate chemistry.

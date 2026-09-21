@@ -1,6 +1,6 @@
 # Final Ranking Robustness
 
-This is a value-weight sensitivity test, not a player-performance confidence interval. It redraws 20,000 plausible domain weights inside the documented ranges.
+I reran the ranking 20,000 times while changing the four core weights inside the ranges listed in the methodology. These percentages show how often each run lands in a given tier; they are not statistical confidence intervals.
 
 | Run | Finishes #1 | Top five | Top 10 |
 |---|---:|---:|---:|
