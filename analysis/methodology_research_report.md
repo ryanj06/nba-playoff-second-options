@@ -34,8 +34,8 @@ time. [Win Shares methodology](https://www.basketball-reference.com/about/ws.htm
 
 Even adjusted plus-minus retains teammate and role effects because players are
 not randomly assigned to lineups. We never observe the clean counterfactual—what
-the same team would have done with a different No. 2 in the same possessions. I
-therefore call this part **fit evidence**, not isolated chemistry.
+the same team would have done with a different No. 2 in the same possessions. So
+I call this part **fit evidence**, not isolated chemistry.
 [PLOS One study](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0237920)
 
 Lineup RAPM research points to the same problem: many playoff lineups only play a

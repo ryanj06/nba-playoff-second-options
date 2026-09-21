@@ -16,7 +16,7 @@ the role audit so the judgment calls are easy to check. Players also had to appe
 in at least eight playoff games, average 15 minutes, and play a meaningful role in
 their team's final series.
 
-## Headline result
+## What came out on top
 
 **2020 Anthony Davis** finishes first. I limited the public list to one run per
 player so it does not become three versions of the same star:
@@ -37,7 +37,7 @@ the graphic and top-ten list.
 
 ![Four-layer top-ten scorecard](analysis/overall_top_10_one_run_per_player_scorecard.png)
 
-## Key visuals
+## What the charts show
 
 The tactical-fit chart shows what kind of problem each player solved beside the
 primary star. It separates secondary creation, scalable gravity, and
@@ -76,8 +76,8 @@ nba_second_options/
   reporting.py    # charts, reports, tables, and run manifest
 ```
 
-Data collection is kept separate from the calculations, which makes the model
-easier to test, review, and reproduce.
+The download code and the ranking code are separate. That makes it easier to
+check the math, swap in a better data source, or rerun the project from cache.
 
 ## Installation
 
@@ -107,13 +107,13 @@ python nba_second_options_single_season.py \
   --output-dir analysis_outputs
 ```
 
-Validate rendering without downloading data:
+To make sure the pipeline and charts work without downloading anything:
 
 ```bash
 python nba_second_options_single_season.py --demo --output-dir demo_outputs
 ```
 
-Replay a completed download without network access:
+To rerun the analysis from an existing cache:
 
 ```bash
 python nba_second_options_single_season.py \
@@ -122,9 +122,9 @@ python nba_second_options_single_season.py \
   --output-dir analysis_outputs
 ```
 
-Cache the official game-level inputs needed for the contextual model. This is a
-large, resumable pull (two cached feeds per playoff game), so run a narrow season
-first and retain the cache:
+The game-level pull is much larger because it saves play-by-play and rotation
+data for every playoff game. It is resumable, but I recommend trying one season
+first and keeping the cache:
 
 ```bash
 python nba_second_options_single_season.py \
@@ -135,19 +135,20 @@ python nba_second_options_single_season.py \
   --output-dir analysis_outputs
 ```
 
-Use `--strict-metrics` to suppress every composite score that lacks one or more
-required components. In standard mode, partial composites remain visible but
-are explicitly marked `PARTIAL` and include a coverage fraction.
+Use `--strict-metrics` if you only want scores with every required input. The
+normal run keeps partial scores visible, labels them `PARTIAL`, and shows how
+much of the underlying data was available.
 
 ## How the ranking works
 
-The published ranking uses the four-part score below. The experimental
-replacement-value model and championship sensitivity test are kept separate.
+The public ranking comes from a four-part scorecard. I keep the experimental
+replacement-value work and the championship-only stress test separate so they
+do not quietly change the main result.
 
-The optional replacement-value model trains on earlier seasons and is tested on
-later ones. I only use its ranking if it beats a historical-average baseline. In
-each comparison, the primary star and team needs stay fixed while the No. 2 is
-replaced by a similar player from the same general era and role.
+The optional replacement-value model learns from earlier seasons and is checked
+on later ones. It only gets used if it can beat a simple historical-average
+baseline. For each comparison, the No. 1 and the team's needs stay fixed while
+the No. 2 is swapped for a similar player from the same era and role.
 
 The main result comes from the simpler scorecard. It combines playoff production
 (43%), total value across the run (22%), role responsibility (15%), and fit with
@@ -156,62 +157,59 @@ the strength of its opponents, and the player's performance in the final series.
 I also rerun the model across thousands of alternative weights to see which
 results hold up and which ones depend on a specific choice.
 
-- **Qualifier:** A team appearing in playoff round 3, cross-checked by completed
-  series victories. Four teams must qualify.
-- **Role identification:** The primary proposal emphasizes scoring load,
-  creation-engine responsibility, PIE, and minutes. After the primary is
-  removed, the secondary proposal emphasizes scoring responsibility. The audit
-  preserves `MODEL_PRIMARY`/`MODEL_SECONDARY` beside the reviewed final labels.
+- **Who gets into the dataset:** Every Conference Finalist is included. A player
+  needs at least eight playoff games, 15 MPG, and meaningful minutes in the
+  team's final series.
+- **How I assign the roles:** The first pass looks at scoring load, creation,
+  the NBA's Player Impact Estimate (PIE), and minutes to find the player the
+  offense ran through. The second pass looks for the next scoring and creation
+  option. The role audit shows both the original model pick and any
+  basketball-based correction.
 - **TS%:** `PTS / (2 × (FGA + 0.44 × FTA))`.
 - **BPM:** Canonical postseason BPM 2.0 scraped from Basketball-Reference. NBA
   raw plus-minus is never relabeled as BPM.
-- **Stabilized 3PT%:** Beta-binomial empirical-Bayes posterior using a
-  season-specific league prior.
-- **Era context:** Points per 75, TS%, usage, creation, and three-point volume
-  are evaluated against all playoff rotation players from the same season.
-  Tracking-based skills use a centered, current-season-weighted three-year window.
-- **Complete-run eligibility:** At least half of the terminal-series games at
-  15+ MPG. This prevents an injury-truncated aggregate from representing the
-  complete Finals or Conference Finals run.
-- **In-era production:** Equal-domain geometric mean of full-playoff-population
-  BPM, points per 75, TS%, and usage percentiles.
-- **Need fulfillment:** Skill supply is weighted by the #1 star's modeled needs
-  and normalized by total modeled need; versatile stars no longer mechanically
-  suppress every fit score.
-- **Strength amplification:** Geometric interactions reward shared creation
-  and gravity strengths. Defensive overlap is not automatically rewarded because
-  a second rim protector can be redundant beside an elite defensive big.
-- **Role-aware defense:** Secondary defensive supply is compared within broad
-  position groups over a nearby-era window before entering need fulfillment.
-- **Role compatibility:** Geometric mean of need fulfillment and strength
-  amplification, with component-level coverage and `PARTIAL` flags.
-- **Final leaderboard core:** 43% rate performance, 22% cumulative run value
+- **Stabilized 3PT%:** A beta-binomial estimate pulls tiny shooting samples
+  toward that season's playoff average. High-volume shooters move much less.
+- **Era adjustment:** Points per 75, TS%, usage, creation, and three-point volume
+  are compared with playoff rotation players from the same period. Tracking
+  stats use a nearby three-year window, weighted toward the current season.
+- **Complete-run check:** The player must log 15+ MPG in at least half of the
+  team's final-series games. That keeps an injury-shortened cameo from standing
+  in for a full Conference Finals or Finals run.
+- **Production:** A geometric mean of era-relative BPM, points per 75, and TS%.
+  The geometric mean keeps one huge number from hiding a weak one.
+- **Filling the star's gaps:** The No. 2's creation, gravity, and defensive value
+  are matched with what the No. 1 needed most.
+- **Doubling down on strengths:** Shared creation and gravity can make both stars
+  harder to guard. Defensive overlap is not always a bonus; another rim
+  protector may add less beside an elite defensive big.
+- **Role-aware defense:** Defensive evidence is compared within broad position
+  groups and nearby seasons before it enters the fit score.
+- **Fit score:** Combines gap-filling with shared offensive strengths. Missing
+  pieces are shown through coverage and `PARTIAL` labels.
+- **Final score:** 43% rate performance, 22% cumulative run value
   from VORP and Win Shares (which already incorporate playing time),
   15% role responsibility, and 20% fit beside the primary star. Production
   remains the largest part. When fit data is missing, that portion moves toward
   a neutral 50 instead of being treated as zero.
-- **Bounded postseason context:** Conference Finals/Finals/title completion adds
+- **Playoff context:** Conference Finals/Finals/title completion adds
   0/1.5/3.5 points; opponent-SRS path and deepest-round play each move a run by at
   most 0.5 point. Opponent SRS is weighted by games faced and a modest later-round
   multiplier. Context cannot replace the player's core performance.
-- **Championship sensitivity check:** Six separate domains preserve the
-  distinction between rate production, role burden, cumulative impact,
-  terminal-series responsibility, historical defensive evidence, and
-  primary-star compatibility. Championship conclusions use 50,000 uniform
-  Dirichlet weight draws instead of presenting one arbitrary 70/30 split.
-- **Defensive evidence:** Defense is not a position-blind standalone percentage
-  of the final score. Total BPM already contains defensive information, and
-  defense also enters complementary fit when the primary-star need and available
-  skill evidence support it. DBPM, defensive win shares, and stocks remain visible
-  diagnostics—not another independent vote. Modern rim/tracking fields and
-  verified matchup assignments remain `NOT_MODELED` when unavailable.
-- **Position-aware scalability:** Perimeter spacing is position-relative and is
-  shown beside interior gravity, so bigs are not evaluated as if they were guards.
-- **Lineup interaction:** Four-state difference-in-differences across both,
-  #1-only, #2-only, and neither lineups. It is labeled
-  `CONTEXTUAL_NOT_CAUSAL` and is excluded from the ranking.
+- **Championship-only check:** I also test title runs across 50,000 different
+  weight combinations. This shows which conclusions survive different ideas of
+  value instead of pretending one split is unquestionably correct.
+- **Defense:** There is no position-blind defensive bonus. BPM already carries
+  some defensive information, and defense also helps the fit score when it
+  answers a real need beside the star. DBPM, defensive Win Shares, steals, and
+  blocks stay visible, but they do not get counted again as a separate vote.
+- **Position-aware spacing:** Perimeter shooting is judged relative to position
+  and shown beside interior gravity, so bigs are not graded like guards.
+- **Lineup interaction:** I calculate both-stars, No. 1-only, No. 2-only, and
+  neither lineups, but keep the result out of the ranking. It is too dependent
+  on teammates and deployment to call causal.
 
-## Data-source policy
+## Where the data comes from
 
 Most of the data comes from NBA Stats through `nba_api`. I use
 Basketball-Reference for BPM, VORP, Win Shares, and team SRS. The downloads are
@@ -224,11 +222,11 @@ gaps in play-type, shot-clock, catch-and-shoot, and rim-defense data. When a
 number is unavailable, I label it `NOT_MODELED`. I do not replace it with zero or
 make up an estimate from an unrelated box-score stat.
 
-## Responsible use and limitations
+## What the ranking can and cannot say
 
-This ranking compares evidence; it does not isolate a player's causal impact.
-Treat close scores as ties or tiers. The role calls are in
-`analysis/role_pairing_audit.csv`, missing tracking is labeled `NOT_MODELED`, and
-raw lineup on/off never stands in for individual value. Player photos stay out
-of the public repo because I am not claiming redistribution rights. The `--demo`
-command uses fake data and is only for testing the pipeline.
+This is a structured comparison, not a claim that I isolated each player's
+causal impact. Scores within a point or two are better read as the same tier.
+Every role call is available in `analysis/role_pairing_audit.csv`, unavailable
+tracking stays `NOT_MODELED`, and raw on/off never stands in for player value.
+Player photos are not in the public repo because I do not own redistribution
+rights. The `--demo` command uses fake data and is only there to test the code.

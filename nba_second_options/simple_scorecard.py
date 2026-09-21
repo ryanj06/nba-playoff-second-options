@@ -217,12 +217,12 @@ def ranking_robustness(
 
 def scorecard_markdown(ranking: pd.DataFrame) -> str:
     lines = [
-        "# Balanced Championship Second-Option Scorecard",
+        "# Championship Second Options Since 2000",
         "",
-        "The score is 43% era-adjusted production, 22% total playoff value, "
-        "15% role responsibility, and 20% fit beside the primary star. Winning the title "
-        "can add up to 3.5 points. Opponent strength and play in the final series are "
-        "limited to +/-0.5 point each.",
+        "This table holds team result constant: every player here won the title. The "
+        "score is 43% era-adjusted production, 22% value across the full run, 15% role "
+        "responsibility, and 20% fit beside the primary star. Opponent strength and the "
+        "final series can each move the result by no more than half a point.",
         "",
         "| Rank | Run | #1 star | Performance | Run value | Responsibility | Fit | Core | Context | Score |",
         "|---:|---|---|---:|---:|---:|---:|---:|---:|---:|",
@@ -243,11 +243,11 @@ def scorecard_markdown(ranking: pd.DataFrame) -> str:
         "",
         "## Notes",
         "",
-        "- Every player in this table won the title, so the team result is held constant.",
-        "- Defense already appears in BPM. It also matters in the fit score when it fills "
-        "a specific need beside the primary star.",
-        "- Box-score defense is not treated as a substitute for positioning, matchups, or rim deterrence.",
-        "- The score compares postseason runs; it does not claim to isolate chemistry.",
+        "- Defense already appears in BPM and can help the fit score when it fills a "
+        "specific need beside the primary star.",
+        "- Blocks and defensive box-score stats do not stand in for positioning, "
+        "matchups, or rim deterrence.",
+        "- This compares postseason runs. It does not claim to isolate chemistry.",
     ])
     return "\n".join(lines)
 
@@ -328,7 +328,7 @@ def plot_scorecard(
     ax.text(-3.55, len(top) + .58, subtitle, color=muted, fontsize=10.5,
             ha="left", va="center")
     ax.text(-3.55, -1.00,
-            "Each category uses its own 0–100 scale so every score stays readable.",
+            "Every category uses the same 0–100 scale.",
             color=muted, fontsize=8.5, ha="left", va="center")
     fig.subplots_adjust(left=.035, right=.98, top=.96, bottom=.06)
     path = output / filename
@@ -358,8 +358,8 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
     one_player_lines = [
         "# Top 10 Second Options: One Run Per Player",
         "",
-        "For this list, each player can appear once. The full dataset still includes "
-        "every qualifying run.",
+        "Each player gets one spot here, using his highest-rated run. The full dataset "
+        "still keeps every qualifying postseason.",
         "",
         "| Rank | Run | Finish | #1 star | Core | Context | Final |",
         "|---:|---|---|---|---:|---:|---:|",
@@ -378,9 +378,9 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
     executive_lines = [
         "# The NBA's Top Single-Season Playoff Second-Option Runs Since 2000",
         "",
-        f"**2020 Anthony Davis** finishes first at {leader.SIMPLE_BALANCED_SCORE:.1f}. "
-        f"His base score is {leader.SIMPLE_BALANCED_CORE_SCORE:.1f}; the title, opponent "
-        "path, and final-series performance add "
+        f"**2020 Anthony Davis** comes out first at {leader.SIMPLE_BALANCED_SCORE:.1f}. "
+        f"His play accounts for a base score of {leader.SIMPLE_BALANCED_CORE_SCORE:.1f}; "
+        "the title, opponent path, and Finals performance add "
         f"{leader.TOTAL_CONTEXT_ADJUSTMENT:+.1f}.",
         "",
         "## Final top 10 — one run per player",
@@ -393,14 +393,15 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
         )
     executive_lines.extend([
         "",
-        "The score puts the most weight on what the player actually produced. It "
+        "Most of the score comes from what the player actually did. It "
         "combines era-adjusted production (43%), total value across the run (22%), "
         "role responsibility (15%), and fit beside the primary star (20%). A title "
         "can add at most 3.5 points, while opponent strength and final-round play "
         "can each change the score by no more than 0.5 point.",
         "",
-        "Players separated by a point or two should be read as the same tier. The formulas, "
-        "sources, and limitations are in `methodology_research_report.md`.",
+        "A gap of one or two points is not meaningful enough to declare one player "
+        "clearly better. The formulas, sources, and limitations are in "
+        "`methodology_research_report.md`.",
     ])
     executive_summary.write_text("\n".join(executive_lines) + "\n")
     one_player_scorecard = plot_scorecard(
@@ -416,11 +417,11 @@ def save_simple_scorecard(frame: pd.DataFrame, output: Path) -> list[Path]:
     robustness.to_csv(robustness_csv, index=False)
     robustness_md = output / "final_ranking_robustness.md"
     robustness_lines = [
-        "# Final Ranking Robustness",
+        "# How Sensitive Is the Ranking?",
         "",
-        "I reran the ranking 20,000 times while changing the four core weights inside "
-        "the ranges listed in the methodology. These percentages show how often each "
-        "run lands in a given tier; they are not statistical confidence intervals.",
+        "I changed the four main weights and reran the ranking 20,000 times. The table "
+        "shows how often each run finished first, in the top five, or in the top ten. "
+        "These are stress-test results, not statistical confidence intervals.",
         "",
         "| Run | Finishes #1 | Top five | Top 10 |",
         "|---|---:|---:|---:|",

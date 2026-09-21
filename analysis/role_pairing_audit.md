@@ -1,10 +1,10 @@
 # #1 / #2 Role Audit — Conference Finalists Since 2000
 
-This file shows every #1/#2 decision before the ranking is calculated. The pairing should match how the team actually played in that postseason, not simply who ranked first and second in one stat.
+This is the full list of #1/#2 calls used in the ranking. I published it because these roles cannot be settled by one stat, and the close calls should be easy to inspect.
 
-The first pass scores the primary star using scoring load (40%), creation (30%), PIE (25%), and minutes (5%). Once that player is removed, the second-option pass uses scoring load (65%), creation (10%), PIE (20%), and minutes (5%). Close calls are flagged. `OWNER_REVIEWED` means I changed or confirmed the pairing after a basketball review; the other rows remain model proposals.
+The first pass looks for the player the offense ran through using scoring load (40%), creation (30%), PIE (25%), and minutes (5%). After that player is removed, the second pass weighs scoring more heavily: scoring load (65%), creation (10%), PIE (20%), and minutes (5%). Close calls are flagged. `OWNER_REVIEWED` means I changed or confirmed the pairing after reviewing how the team was structured; the other rows are the model's original picks.
 
-Lineup net rating is intentionally excluded from role identification.
+I do not use lineup net rating to assign the roles because it is too dependent on the other three players and the opponent.
 
 ## 1999-00
 
@@ -197,4 +197,4 @@ Lineup net rating is intentionally excluded from role identification.
 
 ## Review rule
 
-Approve a row only if #1 represents the postseason's structural primary star and #2 represents the next offensive option. If the team had a genuinely fluid hierarchy, mark it `CO_PRIMARY` or `COMMITTEE` rather than forcing false precision.
+The No. 1 should be the player the postseason offense was built around, and the No. 2 should be the next option. If the hierarchy was genuinely fluid, the honest label is `CO_PRIMARY` or `COMMITTEE` instead of pretending the answer was clear.

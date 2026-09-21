@@ -1,6 +1,6 @@
-# Balanced Championship Second-Option Scorecard
+# Championship Second Options Since 2000
 
-The score is 43% era-adjusted production, 22% total playoff value, 15% role responsibility, and 20% fit beside the primary star. Winning the title can add up to 3.5 points. Opponent strength and play in the final series are limited to +/-0.5 point each.
+This table holds team result constant: every player here won the title. The score is 43% era-adjusted production, 22% value across the full run, 15% role responsibility, and 20% fit beside the primary star. Opponent strength and the final series can each move the result by no more than half a point.
 
 | Rank | Run | #1 star | Performance | Run value | Responsibility | Fit | Core | Context | Score |
 |---:|---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -34,7 +34,6 @@ The score is 43% era-adjusted production, 22% total playoff value, 15% role resp
 
 ## Notes
 
-- Every player in this table won the title, so the team result is held constant.
-- Defense already appears in BPM. It also matters in the fit score when it fills a specific need beside the primary star.
-- Box-score defense is not treated as a substitute for positioning, matchups, or rim deterrence.
-- The score compares postseason runs; it does not claim to isolate chemistry.
+- Defense already appears in BPM and can help the fit score when it fills a specific need beside the primary star.
+- Blocks and defensive box-score stats do not stand in for positioning, matchups, or rim deterrence.
+- This compares postseason runs. It does not claim to isolate chemistry.

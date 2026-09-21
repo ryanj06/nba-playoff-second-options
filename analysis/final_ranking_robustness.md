@@ -1,6 +1,6 @@
-# Final Ranking Robustness
+# How Sensitive Is the Ranking?
 
-I reran the ranking 20,000 times while changing the four core weights inside the ranges listed in the methodology. These percentages show how often each run lands in a given tier; they are not statistical confidence intervals.
+I changed the four main weights and reran the ranking 20,000 times. The table shows how often each run finished first, in the top five, or in the top ten. These are stress-test results, not statistical confidence intervals.
 
 | Run | Finishes #1 | Top five | Top 10 |
 |---|---:|---:|---:|

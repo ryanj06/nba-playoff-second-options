@@ -2,8 +2,8 @@
 
 ## The score
 
-Four parts make up the base score. Postseason context is added afterward and kept
-small on purpose.
+The base score has four parts. I add playoff context afterward, but keep it small
+enough that a ring cannot rescue a much weaker individual run.
 
 | Part | Weight |
 |---|---:|
@@ -26,8 +26,8 @@ The postseason adjustments are:
 - opponent path: `−0.5` to `+0.5`, based on opponents' regular-season SRS;
 - deepest-round play: `−0.5` to `+0.5`.
 
-Put together, context can add no more than 4.5 points or subtract no more than one point.
-The player's own production still drives the result.
+Put together, context can add no more than 4.5 points or take away one point at most.
+The player's own play still drives the result.
 
 ## What goes into each part
 
@@ -45,11 +45,10 @@ R = geomean(era percentile of usage, role route,
 F = coverage × raw compatibility + (1 − coverage) × 50
 ```
 
-The fit score compares the second option's creation, scalable offense
-(perimeter gravity or interior gravity), and role-adjusted defense with the #1
-star's needs. Shared offensive strengths may amplify each other. Defense helps
-only when the primary-star need and secondary supply are modeled; guards do not
-receive a universal rim-protection penalty.
+The fit score asks a simple question: what did this player provide that the No. 1
+needed? It compares secondary creation, perimeter or interior gravity, and
+role-adjusted defense with the primary star's profile. Shared offensive strengths
+can help too. Guards are never penalized for failing to protect the rim.
 
 ## Opponent strength
 
@@ -66,15 +65,15 @@ describes the path, not the player's performance.
 
 ## Rules for role and defense
 
-- The #1 is the structural offensive engine, not automatically the top scorer or
-  usage leader; all pairings are preserved in the role audit.
+- The No. 1 is the player the offense was built around, not automatically the top
+  scorer or usage leader. Every pairing is visible in the role audit.
 - Bigs can carry responsibility through rebounding/rim protection instead of
   guard-style assist volume.
-- BPM defense is treated cautiously; historical positioning, deterrence, and
-  matchup information are not invented.
-- Missing tracking evidence is `NOT_MODELED` and fit is shrunk toward neutral in
-  proportion to coverage.
-- Raw lineup on/off is descriptive only and excluded from the rank.
+- I use BPM's defensive information cautiously and never invent historical
+  positioning, deterrence, or matchup data.
+- Missing tracking stays `NOT_MODELED`. When fit evidence is incomplete, that
+  part of the score moves toward a neutral 50.
+- Raw lineup on/off is useful context, but it does not affect the ranking.
 - VORP and Win Shares already include playing time, so MPG is not counted again
   inside cumulative value. Deepest-round MPG appears only in role responsibility.
 

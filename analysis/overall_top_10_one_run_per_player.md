@@ -1,6 +1,6 @@
 # Top 10 Second Options: One Run Per Player
 
-For this list, each player can appear once. The full dataset still includes every qualifying run.
+Each player gets one spot here, using his highest-rated run. The full dataset still keeps every qualifying postseason.
 
 | Rank | Run | Finish | #1 star | Core | Context | Final |
 |---:|---|---|---|---:|---:|---:|

@@ -214,10 +214,12 @@ def generate_summary(frame: pd.DataFrame, config: PipelineConfig) -> str:
         1, "BEST_SECOND_OPTION_SCORE")
     if not leader.empty:
         row = leader.iloc[0]
-        lines.append(f"**{row.PLAYER_NAME} ({row.SEASON}, {row.TEAM_ABBREVIATION})** has the "
-                     "strongest observed complete-run production profile in the reviewed dataset. "
-                     "This is not a claim that lineup results are causal: "
-                     "creation, spacing, defense, and pairing fit solve different problems.")
+        lines.append(
+            f"**{row.PLAYER_NAME} ({row.SEASON}, {row.TEAM_ABBREVIATION})** has "
+            "the strongest complete-run profile in this version of the model. The "
+            "ranking treats creation, spacing, defense, and fit as different jobs; "
+            "it does not treat lineup results as causal."
+        )
     lines += ["", "## Top 10 since 2000", ""]
     top_ten = eligible.nlargest(10, "BEST_SECOND_OPTION_SCORE")
     lines += ["| Rank | Run | Primary star | Pts/75 | rTS | BPM | In-era production | "
@@ -244,13 +246,15 @@ def generate_summary(frame: pd.DataFrame, config: PipelineConfig) -> str:
                          f"{row[score]:.1f} ({row.get(score + '_STATUS', PARTIAL)})")
         lines.append("")
     lines += ["## Tactical trade-offs", "",
-        "- **Creation versus scalability:** isolation creation rescues broken possessions; shooting gravity preserves space.",
-        "- **Output versus pairing fit:** points per 75, relative TS%, and BPM describe "
-        "in-era production; fit explains tactical utility but does not determine rank.",
-        "- **Defense versus visibility:** rim deterrence is scored only where tracking exists; blocks are not treated as complete rim protection.",
+        "- **Creation and spacing do different jobs:** isolation scoring can rescue a "
+        "broken possession, while shooting gravity keeps the floor open.",
+        "- **Production still comes first:** points per 75, relative TS%, and BPM describe "
+        "what the player produced; fit explains why it worked beside the star.",
+        "- **Defensive evidence has limits:** rim deterrence is only used where tracking "
+        "exists, and blocks are not treated as a complete measure of rim protection.",
         "", "## Methodology", "",
         f"Players qualify at **{config.min_games}+ games** and **{config.min_mpg:g}+ MPG**. "
-        "A documented human-in-the-loop role audit determines #1/#2 labels from an engine-aware proposal. "
+        "The role audit checks the initial #1/#2 picks against how the offense actually worked. "
         "Season baselines use all playoff rotation players meeting the qualifier. Production is the "
         "equal-domain geometric mean of era-relative points per 75, true shooting, BPM, and "
         "offensive burden. Fit explains the result but cannot override observed production. "
